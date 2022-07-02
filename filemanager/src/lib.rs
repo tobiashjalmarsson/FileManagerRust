@@ -43,30 +43,31 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         search(&config.query, &contents)
     };
 
-    for line in results {
-        println!("{}", line);
+    for result in results {
+        println!("{}", result);
     }
 
     Ok(())
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    contents
-        .lines()
-        .filter(|line| line.contains(query))
-        .collect()
-}
-
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let query = query.to_lowercase();
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<String> {
     let mut results = Vec::new();
-
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line);
+    for (idx, line) in contents.lines().enumerate() {
+        if line.to_lowercase().contains(&query){
+            results.push(format!("On line {}: {}", idx+1, line))
         }
     }
+    results
+}
 
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<String> {
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+    for (idx, line) in contents.lines().enumerate() {
+        if line.to_lowercase().contains(&query){
+            results.push(format!("On line {}: {}", idx+1, line))
+        }
+    }
     results
 }
 
@@ -82,7 +83,7 @@ Rust:
 safe, fast, productive.
 Pick three.";
 
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+        assert_eq!(vec!["On line 1: safe, fast, productive."], search(query, contents));
     }
 
     #[test]
@@ -95,7 +96,7 @@ Pick three.
 Trust me.";
 
         assert_eq!(
-            vec!["Rust:", "Trust me."],
+            vec!["On line 0: Rust:", "On line 3: Trust me."],
             search_case_insensitive(query, contents)
         );
     }
