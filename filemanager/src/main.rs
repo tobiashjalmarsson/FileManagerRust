@@ -1,13 +1,22 @@
 use std::env;
+use std::process;
 
-enum Stage {
-    Initial = 1,
-    Options = 2,
-    Confirmation = 3
-}
+// IGNORE_CASE=1 cargo run to testfile.txt
 
+
+use filemanager::Config;
 fn main() {
-    let stage: Stage = Stage::Initial;
     let args: Vec<String> = env::args().collect();
-    println!("{:?}", args);
+
+    let config = Config::new(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
+
+    if let Err(e) = filemanager::run(config) {
+        eprintln!("Application error: {}", e);
+
+        process::exit(1);
+    }
 }
+
